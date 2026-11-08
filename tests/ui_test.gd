@@ -37,5 +37,15 @@ func run() -> void:
  await process_frame
  await process_frame
  assert(game.state.mode=="tutorial")
- print("PASS: title-to-tutorial button and UI tree")
+ game.state.mode="game"
+ game._render()
+ await process_frame
+ await process_frame
+ game.scroll.scroll_vertical=180
+ await process_frame
+ game._render()
+ await process_frame
+ await process_frame
+ assert(game.scroll.scroll_vertical>0, "game controls must retain scroll after selection")
+ print("PASS: title-to-tutorial mouse button, UI tree and game scroll persistence")
  quit()

@@ -94,6 +94,7 @@ func _row(parent: Node) -> HFlowContainer:
  return r
 
 func _render() -> void:
+ var previous_scroll := scroll.scroll_vertical if is_instance_valid(scroll) and str(state.mode)=="game" else 0
  for child in get_children():
   if child != audio: child.queue_free()
  scroll = ScrollContainer.new()
@@ -122,6 +123,11 @@ func _render() -> void:
   "won", "lost": _ending()
  var foot := _card("조작 안내", "키보드 1 / 5 / 0: 동전 추가  ·  Enter: 판매 확인  ·  Z: 되돌리기  ·  Esc: 제목\n마우스와 터치: 모든 단추 사용 가능. 저장은 이 브라우저에만 남습니다.")
  foot.add_child(_label("자작 장부·동전 도형 | Nanum Gothic (SIL OFL)",14))
+ if previous_scroll > 0: _restore_scroll.call_deferred(previous_scroll)
+
+func _restore_scroll(value: int) -> void:
+ await get_tree().process_frame
+ if is_instance_valid(scroll): scroll.scroll_vertical = value
 
 func _title() -> void:
  var c := _card("오늘의 규칙", "7일 동안 매일 4명의 손님 중 최소 3명에게 판매하세요. 총 25건을 달성하면 승리!\n현재 금고에서만 거스름돈을 골라 지불합니다. 손님 동전은 판매 후에 들어옵니다. 가격과 손님의 지불 동전, 다음 손님을 모두 볼 수 있습니다.")
