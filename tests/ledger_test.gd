@@ -3,6 +3,7 @@ const L = preload("res://scripts/ledger.gd")
 var visits := 0
 var failures := 0
 var memo := {}
+var witness := []
 
 func _initialize() -> void:
  run_tests()
@@ -24,15 +25,23 @@ func choices(vault: Array, due: int) -> Array:
 func win_path(s: Dictionary) -> bool:
  if str(s.mode)=="won": return true
  if str(s.mode)=="lost": return false
- if str(s.mode)=="review": return win_path(L.next_day(s))
+ if str(s.mode)=="review":
+  witness.append("next")
+  if win_path(L.next_day(s)): return true
+  witness.pop_back()
+  return false
  var key := "%d,%d,%d,%d,%d,%d,%d" % [int(s.day),int(s.cursor),int(s.vault[0]),int(s.vault[1]),int(s.vault[2]),int(s.daily),int(s.sold)]
  if memo.has(key): return false
  memo[key]=true
  visits += 1
  for x in choices(s.vault,L.change_due(s)):
   s.selection=x
+  witness.append(x)
   if win_path(L.apply(s,true)): return true
+  witness.pop_back()
+ witness.append("reject")
  if win_path(L.apply(s,false)): return true
+ witness.pop_back()
  return false
 
 func run_tests() -> void:
@@ -58,3 +67,4 @@ func run_tests() -> void:
  start.mode="game"
  assert_true(win_path(start),"7-day winning path exists")
  print("PASS: 7-day reachable victory, ",visits," explored states; preview/undo/reject/amount/queue")
+ print("Winning input witness: ", witness)
